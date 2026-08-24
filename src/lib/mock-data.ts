@@ -50,6 +50,10 @@ export interface Collection {
   updatedAt: string;
 }
 
+export function itemTypeSlug(name: string): string {
+  return `${name.toLowerCase()}s`;
+}
+
 export const currentUser: User = {
   id: "user-1",
   name: "John Doe",
