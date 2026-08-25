@@ -1,3 +1,4 @@
+import { createElement, type CSSProperties } from "react";
 import {
   Code,
   File,
@@ -23,4 +24,19 @@ const iconMap: Record<string, LucideIcon> = {
 
 export function getTypeIcon(name: string): LucideIcon {
   return iconMap[name] ?? FolderOpen;
+}
+
+// createElement (not JSX) avoids react-hooks/static-components: the rule can't
+// tell this lookup always returns the same stable icon reference, so it flags
+// the usual `const Icon = getTypeIcon(...); <Icon />` as a component created during render.
+export function TypeIcon({
+  name,
+  className,
+  style,
+}: {
+  name: string;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  return createElement(getTypeIcon(name), { className, style });
 }
