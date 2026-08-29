@@ -11,6 +11,37 @@ async function main() {
 
   const userCount = await prisma.user.count();
   console.log("User count:", userCount);
+
+  const demoUser = await prisma.user.findUnique({
+    where: { email: "benmorgiewicz@gmail.com" },
+    include: {
+      collections: {
+        include: {
+          items: {
+            include: { item: { include: { itemType: true } } },
+          },
+        },
+      },
+    },
+  });
+
+  if (!demoUser) {
+    console.log("Demo user not found. Run `npm run db:seed` first.");
+    return;
+  }
+
+  console.log(`\nDemo user: ${demoUser.name} <${demoUser.email}> (isPro: ${demoUser.isPro})`);
+
+  const itemTypeCount = await prisma.itemType.count({ where: { isSystem: true } });
+  console.log(`System item types: ${itemTypeCount}`);
+
+  console.log(`\nCollections (${demoUser.collections.length}):`);
+  for (const collection of demoUser.collections) {
+    console.log(`- ${collection.name} (${collection.items.length} items)`);
+    for (const { item } of collection.items) {
+      console.log(`    [${item.itemType.name}] ${item.title}`);
+    }
+  }
 }
 
 main()
