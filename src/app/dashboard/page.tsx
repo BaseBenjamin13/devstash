@@ -3,6 +3,9 @@ import { RecentCollections } from "@/components/dashboard/recent-collections";
 import { RecentItems } from "@/components/dashboard/recent-items";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 
+// Dashboard reads live data from the database on every request.
+export const dynamic = "force-dynamic";
+
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
