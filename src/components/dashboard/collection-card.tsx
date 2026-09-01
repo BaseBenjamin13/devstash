@@ -1,25 +1,23 @@
 import Link from "next/link";
 import { Star } from "lucide-react";
 
-import { getTypeIcon } from "@/lib/icon-map";
-import { getCollectionItems, getDominantItemType } from "@/lib/dashboard-data";
-import { itemTypes, type Collection, type ItemType } from "@/lib/mock-data";
+import { TypeIcon } from "@/lib/icon-map";
+import type { CollectionCardData } from "@/lib/db/collections";
 
-export function CollectionCard({ collection }: { collection: Collection }) {
-  const collectionItems = getCollectionItems(collection.id);
-  const dominantType = getDominantItemType(collection.id);
-  const typeIds = Array.from(
-    new Set(collectionItems.map((item) => item.itemTypeId))
-  );
-  const cardTypes = typeIds
-    .map((typeId) => itemTypes.find((type) => type.id === typeId))
-    .filter((type): type is ItemType => Boolean(type));
-
+export function CollectionCard({
+  collection,
+}: {
+  collection: CollectionCardData;
+}) {
   return (
     <Link
       href={`/collections/${collection.id}`}
       className="flex flex-col gap-3 rounded-lg border border-border border-l-4 bg-card p-4 transition-colors hover:bg-accent/50"
-      style={dominantType ? { borderLeftColor: dominantType.color } : undefined}
+      style={
+        collection.dominantColor
+          ? { borderLeftColor: collection.dominantColor }
+          : undefined
+      }
     >
       <div className="flex items-center gap-1.5">
         <h3 className="font-semibold">{collection.name}</h3>
@@ -28,17 +26,21 @@ export function CollectionCard({ collection }: { collection: Collection }) {
         )}
       </div>
       <p className="text-xs text-muted-foreground">
-        {collectionItems.length} items
+        {collection.itemCount} items
       </p>
-      <p className="text-sm text-muted-foreground">{collection.description}</p>
-      {cardTypes.length > 0 && (
+      {collection.description && (
+        <p className="text-sm text-muted-foreground">{collection.description}</p>
+      )}
+      {collection.types.length > 0 && (
         <div className="mt-auto flex items-center gap-2 pt-1">
-          {cardTypes.map((type) => {
-            const Icon = getTypeIcon(type.icon);
-            return (
-              <Icon key={type.id} className="size-4" style={{ color: type.color }} />
-            );
-          })}
+          {collection.types.map((type) => (
+            <TypeIcon
+              key={type.id}
+              name={type.icon}
+              className="size-4"
+              style={{ color: type.color }}
+            />
+          ))}
         </div>
       )}
     </Link>
