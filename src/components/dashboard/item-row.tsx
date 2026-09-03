@@ -1,12 +1,10 @@
 import { Pin, Star } from "lucide-react";
 
 import { TypeIcon } from "@/lib/icon-map";
-import { formatItemDate, getItemTags, getItemType } from "@/lib/dashboard-data";
-import type { Item } from "@/lib/mock-data";
+import { formatItemDate, type Item } from "@/lib/db/items";
 
 export function ItemRow({ item }: { item: Item }) {
-  const type = getItemType(item.itemTypeId);
-  const itemTags = getItemTags(item);
+  const type = item.itemType;
 
   return (
     <div
@@ -34,9 +32,9 @@ export function ItemRow({ item }: { item: Item }) {
             {item.description}
           </p>
         )}
-        {itemTags.length > 0 && (
+        {item.tags.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1.5">
-            {itemTags.map((tag) => (
+            {item.tags.map((tag) => (
               <span
                 key={tag.id}
                 className="rounded-full bg-secondary px-2 py-0.5 text-[0.65rem] text-secondary-foreground"

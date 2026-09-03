@@ -1,8 +1,8 @@
 import { ItemRow } from "@/components/dashboard/item-row";
-import { getPinnedItems } from "@/lib/dashboard-data";
+import { getPinnedItems } from "@/lib/db/items";
 
-export function PinnedItems() {
-  const pinnedItems = getPinnedItems();
+export async function PinnedItems() {
+  const pinnedItems = await getPinnedItems();
 
   if (pinnedItems.length === 0) return null;
 
