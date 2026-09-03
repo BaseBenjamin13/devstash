@@ -1,18 +1,7 @@
 import { cache } from "react";
 
 import { prisma } from "@/lib/prisma";
-
-// No auth yet — dashboard data is scoped to the seeded demo user for now.
-// Swap this for the authenticated session user once NextAuth lands.
-const DEMO_USER_EMAIL = "benmorgiewicz@gmail.com";
-
-const getDashboardUserId = cache(async (): Promise<string | null> => {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-    select: { id: true },
-  });
-  return user?.id ?? null;
-});
+import { getCurrentUserId } from "@/lib/db/user";
 
 export interface CollectionCardTypeIcon {
   id: string;
@@ -35,7 +24,7 @@ export interface CollectionCardData {
 
 export const getRecentCollections = cache(
   async (limit: number): Promise<CollectionCardData[]> => {
-    const userId = await getDashboardUserId();
+    const userId = await getCurrentUserId();
     if (!userId) return [];
 
     const collections = await prisma.collection.findMany({
@@ -94,7 +83,7 @@ export interface CollectionStats {
 }
 
 export const getCollectionStats = cache(async (): Promise<CollectionStats> => {
-  const userId = await getDashboardUserId();
+  const userId = await getCurrentUserId();
   if (!userId) return { total: 0, favorites: 0 };
 
   const [total, favorites] = await Promise.all([

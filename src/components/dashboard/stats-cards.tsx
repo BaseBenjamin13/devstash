@@ -1,14 +1,16 @@
 import { FolderOpen, Heart, Layers, Star } from "lucide-react";
 
-import { items } from "@/lib/mock-data";
 import { getCollectionStats } from "@/lib/db/collections";
+import { getItemStats } from "@/lib/db/items";
 
 export async function StatsCards() {
-  const collectionStats = await getCollectionStats();
+  const [itemStats, collectionStats] = await Promise.all([
+    getItemStats(),
+    getCollectionStats(),
+  ]);
 
   const stats = [
-    // TODO: source item counts from the DB once the items feature is wired up.
-    { label: "Items", value: items.length, icon: Layers, color: "#3b82f6" },
+    { label: "Items", value: itemStats.total, icon: Layers, color: "#3b82f6" },
     {
       label: "Collections",
       value: collectionStats.total,
@@ -17,7 +19,7 @@ export async function StatsCards() {
     },
     {
       label: "Favorite Items",
-      value: items.filter((item) => item.isFavorite).length,
+      value: itemStats.favorites,
       icon: Star,
       color: "#f59e0b",
     },

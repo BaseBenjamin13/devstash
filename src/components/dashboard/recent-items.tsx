@@ -1,10 +1,10 @@
 import { ItemRow } from "@/components/dashboard/item-row";
-import { getRecentItems } from "@/lib/dashboard-data";
+import { getRecentItems } from "@/lib/db/items";
 
 const RECENT_ITEMS_LIMIT = 10;
 
-export function RecentItems() {
-  const recentItems = getRecentItems(RECENT_ITEMS_LIMIT);
+export async function RecentItems() {
+  const recentItems = await getRecentItems(RECENT_ITEMS_LIMIT);
 
   if (recentItems.length === 0) return null;
 
