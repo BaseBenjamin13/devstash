@@ -98,3 +98,35 @@ export const getItemStats = cache(async (): Promise<ItemStats> => {
 
   return { total, favorites };
 });
+
+export interface ItemTypeWithCount {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  count: number;
+}
+
+// System types (userId null) plus this user's own custom types, in creation order.
+export const getItemTypesWithCounts = cache(
+  async (): Promise<ItemTypeWithCount[]> => {
+    const userId = await getCurrentUserId();
+    if (!userId) return [];
+
+    const types = await prisma.itemType.findMany({
+      where: { OR: [{ isSystem: true }, { userId }] },
+      orderBy: { createdAt: "asc" },
+      include: {
+        _count: { select: { items: { where: { userId } } } },
+      },
+    });
+
+    return types.map((type) => ({
+      id: type.id,
+      name: type.name,
+      icon: type.icon,
+      color: type.color,
+      count: type._count.items,
+    }));
+  }
+);

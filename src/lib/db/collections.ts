@@ -22,59 +22,76 @@ export interface CollectionCardData {
   dominantColor: string | null;
 }
 
-export const getRecentCollections = cache(
-  async (limit: number): Promise<CollectionCardData[]> => {
-    const userId = await getCurrentUserId();
-    if (!userId) return [];
-
-    const collections = await prisma.collection.findMany({
-      where: { userId },
-      orderBy: { updatedAt: "desc" },
-      take: limit,
-      include: {
-        items: {
-          include: {
-            item: {
-              select: {
-                itemType: {
-                  select: { id: true, name: true, icon: true, color: true },
-                },
-              },
-            },
+const collectionCardInclude = {
+  items: {
+    include: {
+      item: {
+        select: {
+          itemType: {
+            select: { id: true, name: true, icon: true, color: true },
           },
         },
       },
-    });
+    },
+  },
+} as const;
 
-    return collections.map((collection) => {
-      const counts = new Map<
-        string,
-        { type: CollectionCardTypeIcon; count: number }
-      >();
+type CollectionRow = Awaited<
+  ReturnType<
+    typeof prisma.collection.findMany<{ include: typeof collectionCardInclude }>
+  >
+>[number];
 
-      for (const { item } of collection.items) {
-        const type = item.itemType;
-        const entry = counts.get(type.id);
-        if (entry) {
-          entry.count += 1;
-        } else {
-          counts.set(type.id, { type, count: 1 });
-        }
-      }
+function toCollectionCard(collection: CollectionRow): CollectionCardData {
+  const counts = new Map<
+    string,
+    { type: CollectionCardTypeIcon; count: number }
+  >();
 
-      const byUsage = [...counts.values()].sort((a, b) => b.count - a.count);
-
-      return {
-        id: collection.id,
-        name: collection.name,
-        description: collection.description,
-        isFavorite: collection.isFavorite,
-        itemCount: collection.items.length,
-        types: byUsage.map((entry) => entry.type),
-        dominantColor: byUsage[0]?.type.color ?? null,
-      };
-    });
+  for (const { item } of collection.items) {
+    const type = item.itemType;
+    const entry = counts.get(type.id);
+    if (entry) {
+      entry.count += 1;
+    } else {
+      counts.set(type.id, { type, count: 1 });
+    }
   }
+
+  const byUsage = [...counts.values()].sort((a, b) => b.count - a.count);
+
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
+    isFavorite: collection.isFavorite,
+    itemCount: collection.items.length,
+    types: byUsage.map((entry) => entry.type),
+    dominantColor: byUsage[0]?.type.color ?? null,
+  };
+}
+
+async function fetchCollectionCards(limit?: number): Promise<CollectionCardData[]> {
+  const userId = await getCurrentUserId();
+  if (!userId) return [];
+
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+    ...(limit !== undefined ? { take: limit } : {}),
+    include: collectionCardInclude,
+  });
+
+  return collections.map(toCollectionCard);
+}
+
+export const getRecentCollections = cache(
+  (limit: number): Promise<CollectionCardData[]> => fetchCollectionCards(limit)
+);
+
+// All of the user's collections, for the sidebar's favorites/recents lists.
+export const getSidebarCollections = cache(
+  (): Promise<CollectionCardData[]> => fetchCollectionCards()
 );
 
 export interface CollectionStats {
