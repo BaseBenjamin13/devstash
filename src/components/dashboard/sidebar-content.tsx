@@ -1,19 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { PanelLeft, Settings, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/dashboard/sidebar-provider";
-import { getTypeIcon } from "@/lib/icon-map";
-import {
-  collections,
-  currentUser,
-  itemTypeSlug,
-  itemTypes,
-  items,
-} from "@/lib/mock-data";
-
-const RECENT_COLLECTIONS_LIMIT = 5;
+import { getTypeIcon, itemTypeSlug } from "@/lib/icon-map";
+import type { CollectionCardData } from "@/lib/db/collections";
+import type { ItemTypeWithCount } from "@/lib/db/items";
+import { currentUser } from "@/lib/mock-data";
 
 function initials(name: string) {
   return name
@@ -24,21 +20,24 @@ function initials(name: string) {
     .toUpperCase();
 }
 
+function capitalize(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 export function SidebarContent({
   collapsed,
   onNavigate,
+  itemTypes,
+  favoriteCollections,
+  recentCollections,
 }: {
   collapsed: boolean;
   onNavigate?: () => void;
+  itemTypes: ItemTypeWithCount[];
+  favoriteCollections: CollectionCardData[];
+  recentCollections: CollectionCardData[];
 }) {
   const { toggleSidebar } = useSidebar();
-  const favoriteCollections = collections.filter((c) => c.isFavorite);
-  const recentCollections = collections
-    .filter((c) => !c.isFavorite)
-    .sort(
-      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    )
-    .slice(0, RECENT_COLLECTIONS_LIMIT);
 
   return (
     <div className="flex h-full flex-col">
@@ -70,13 +69,12 @@ export function SidebarContent({
           <ul className="mt-1 space-y-0.5">
             {itemTypes.map((type) => {
               const Icon = getTypeIcon(type.icon);
-              const count = items.filter((i) => i.itemTypeId === type.id).length;
               return (
                 <li key={type.id}>
                   <Link
                     href={`/items/${itemTypeSlug(type.name)}`}
                     onClick={onNavigate}
-                    title={collapsed ? type.name : undefined}
+                    title={collapsed ? capitalize(type.name) : undefined}
                     className={cn(
                       "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground",
                       collapsed && "justify-center"
@@ -88,9 +86,11 @@ export function SidebarContent({
                     />
                     {!collapsed && (
                       <>
-                        <span className="flex-1 truncate">{type.name}s</span>
+                        <span className="flex-1 truncate">
+                          {capitalize(type.name)}s
+                        </span>
                         <span className="text-xs text-muted-foreground">
-                          {count}
+                          {type.count}
                         </span>
                       </>
                     )}
@@ -101,7 +101,7 @@ export function SidebarContent({
           </ul>
         </div>
 
-        {!collapsed && (favoriteCollections.length > 0 || recentCollections.length > 0) && (
+        {!collapsed && (
           <div className="mt-6">
             <h3 className="px-2 text-xs font-medium text-muted-foreground">
               Collections
@@ -135,28 +135,40 @@ export function SidebarContent({
                   RECENT
                 </p>
                 <ul className="space-y-0.5">
-                  {recentCollections.map((collection) => {
-                    const count = items.filter((i) =>
-                      i.collectionIds.includes(collection.id)
-                    ).length;
-                    return (
-                      <li key={collection.id}>
-                        <Link
-                          href={`/collections/${collection.id}`}
-                          onClick={onNavigate}
-                          className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <span className="flex-1 truncate">{collection.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {count}
-                          </span>
-                        </Link>
-                      </li>
-                    );
-                  })}
+                  {recentCollections.map((collection) => (
+                    <li key={collection.id}>
+                      <Link
+                        href={`/collections/${collection.id}`}
+                        onClick={onNavigate}
+                        className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <span className="flex-1 truncate">{collection.name}</span>
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "size-2.5 shrink-0 rounded-full",
+                            !collection.dominantColor && "bg-muted-foreground/40"
+                          )}
+                          style={
+                            collection.dominantColor
+                              ? { backgroundColor: collection.dominantColor }
+                              : undefined
+                          }
+                        />
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               </div>
             )}
+
+            <Link
+              href="/collections"
+              onClick={onNavigate}
+              className="mt-3 block rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            >
+              View all collections
+            </Link>
           </div>
         )}
       </nav>

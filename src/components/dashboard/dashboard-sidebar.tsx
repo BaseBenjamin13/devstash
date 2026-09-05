@@ -1,39 +1,25 @@
-"use client";
+import { getSidebarCollections } from "@/lib/db/collections";
+import { getItemTypesWithCounts } from "@/lib/db/items";
+import { SidebarShell } from "@/components/dashboard/sidebar-shell";
 
-import { cn } from "@/lib/utils";
-import { SidebarContent } from "@/components/dashboard/sidebar-content";
-import { useSidebar } from "@/components/dashboard/sidebar-provider";
+const RECENT_COLLECTIONS_LIMIT = 5;
 
-export function DashboardSidebar() {
-  const { collapsed, mobileOpen, closeMobileSidebar } = useSidebar();
+export async function DashboardSidebar() {
+  const [itemTypes, sidebarCollections] = await Promise.all([
+    getItemTypesWithCounts(),
+    getSidebarCollections(),
+  ]);
+
+  const favoriteCollections = sidebarCollections.filter((c) => c.isFavorite);
+  const recentCollections = sidebarCollections
+    .filter((c) => !c.isFavorite)
+    .slice(0, RECENT_COLLECTIONS_LIMIT);
 
   return (
-    <>
-      <aside
-        className={cn(
-          "hidden shrink-0 border-r border-border transition-[width] duration-200 md:block",
-          collapsed ? "w-16" : "w-64"
-        )}
-      >
-        <SidebarContent collapsed={collapsed} />
-      </aside>
-
-      <div
-        aria-hidden={!mobileOpen}
-        className={cn(
-          "fixed inset-0 z-40 bg-black/50 transition-opacity md:hidden",
-          mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        )}
-        onClick={closeMobileSidebar}
-      />
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 border-r border-border bg-background transition-transform duration-200 md:hidden",
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <SidebarContent collapsed={false} onNavigate={closeMobileSidebar} />
-      </aside>
-    </>
+    <SidebarShell
+      itemTypes={itemTypes}
+      favoriteCollections={favoriteCollections}
+      recentCollections={recentCollections}
+    />
   );
 }

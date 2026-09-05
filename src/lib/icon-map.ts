@@ -26,6 +26,11 @@ export function getTypeIcon(name: string): LucideIcon {
   return iconMap[name] ?? FolderOpen;
 }
 
+// Slug used for /items/[typename] links, e.g. "snippet" -> "snippets".
+export function itemTypeSlug(name: string): string {
+  return `${name.toLowerCase()}s`;
+}
+
 // createElement (not JSX) avoids react-hooks/static-components: the rule can't
 // tell this lookup always returns the same stable icon reference, so it flags
 // the usual `const Icon = getTypeIcon(...); <Icon />` as a component created during render.
