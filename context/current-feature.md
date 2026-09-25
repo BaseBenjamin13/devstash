@@ -1,20 +1,16 @@
-# Current Feature: Add Pro Badge to Sidebar
+# Current Feature
+
+_None — pick the next feature and document it here._
 
 ## Status
 
-In Progress
+Not started
 
 ## Goals
 
-- Add a "PRO" badge to the File and Image item types in the sidebar
-- Badge text must be all uppercase ("PRO")
-- Use the ShadCN UI `Badge` component
-- Badge styling should be clean and subtle (not loud/distracting)
+<!-- Describe the next feature here -->
 
 ## Notes
-
-- Spec: @context/features/add-pro-badge-sidebar.md
-- Applies to sidebar item-type links only (File, Image are the Pro-gated system types per @context/project-overview.md)
 
 ## History
 
@@ -30,3 +26,4 @@ In Progress
 - Dashboard Collections — Real Data: new `src/lib/db/collections.ts` (`getRecentCollections`, `getCollectionStats`, React `cache`-wrapped; resolves the seeded demo user by email until NextAuth lands); `RecentCollections` + `StatsCards` are now async server components reading from Neon via Prisma; `CollectionCard` takes a `CollectionCardData` shape with `itemCount`, distinct `types` (most-used first), and `dominantColor` for the left border; `/dashboard` set to `force-dynamic`. Sidebar and Pinned/Recent Items still on mock data; items under collection cards deferred. Spec: @context/features/dashboard-collections-spec.md
 - Dashboard Items — Real Data: new `src/lib/db/items.ts` (`getPinnedItems`, `getRecentItems`, `getItemStats`, `formatItemDate`, React `cache`-wrapped) returning plain `Item`/`ItemType`/`ItemTag` view types with `itemType` + `tags` pre-resolved; shared demo-user resolver extracted to `src/lib/db/user.ts` (`getCurrentUserId`) and reused by `collections.ts`. `PinnedItems` + `RecentItems` are now async server components reading from Neon; `ItemRow` takes the new `Item` shape; `StatsCards` item + favorite-item counts come from `getItemStats()`. Removed the now-unused `src/lib/dashboard-data.ts`. Sidebar still on mock data; items nested under collection cards still deferred. Spec: @context/features/dashboard-items-spec.md
 - Stats & Sidebar — Real Data: `StatsCards` was already reading from the DB (no change needed there). Added `getItemTypesWithCounts` to `src/lib/db/items.ts` and `itemTypeSlug` to `src/lib/icon-map.ts` (kept out of `db/items.ts` so the client-side sidebar doesn't pull in server-only Prisma code); refactored `src/lib/db/collections.ts` to share fetch/mapping logic between `getRecentCollections` and the new `getSidebarCollections`. Sidebar is now a server component (`dashboard-sidebar.tsx`, async, fetches types + collections) rendering a new client `SidebarShell` (holds the collapse/mobile `useSidebar` state) which renders `SidebarContent` (now prop-driven instead of reading `mock-data`) twice for desktop/mobile. Sidebar shows real item types with icons + per-user counts linking to `/items/[typename]`, real favorite collections (star icon) and recent collections (colored circle = most-used item type's color), and a "View all collections" link to `/collections`. User avatar footer still reads `currentUser` from `mock-data.ts` (no auth/session yet — out of scope). Spec: @context/features/stats-sidebar-spec.md
+- Add Pro Badge to Sidebar: added the ShadCN `Badge` component (`src/components/ui/badge.tsx`) and a small `isProType()` check in `sidebar-content.tsx` that shows a subtle, uppercase "PRO" badge (outline variant, `text-amber-500`, matching the favorites star color) next to the File and Image item-type links. Spec: @context/features/add-pro-badge-sidebar.md
