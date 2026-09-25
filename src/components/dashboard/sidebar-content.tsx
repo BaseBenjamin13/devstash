@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PanelLeft, Settings, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/dashboard/sidebar-provider";
 import { getTypeIcon, itemTypeSlug } from "@/lib/icon-map";
@@ -22,6 +23,12 @@ function initials(name: string) {
 
 function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+const PRO_TYPE_NAMES = new Set(["file", "image"]);
+
+function isProType(name: string) {
+  return PRO_TYPE_NAMES.has(name.toLowerCase());
 }
 
 export function SidebarContent({
@@ -89,6 +96,14 @@ export function SidebarContent({
                         <span className="flex-1 truncate">
                           {capitalize(type.name)}s
                         </span>
+                        {isProType(type.name) && (
+                          <Badge
+                            variant="outline"
+                            className="h-4 px-1 text-[0.6rem] font-medium tracking-wide text-amber-500"
+                          >
+                            PRO
+                          </Badge>
+                        )}
                         <span className="text-xs text-muted-foreground">
                           {type.count}
                         </span>
