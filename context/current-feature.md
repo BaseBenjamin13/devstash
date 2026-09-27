@@ -1,16 +1,25 @@
 # Current Feature
 
-_None — pick the next feature and document it here._
+Dashboard Header Accessibility & Deduplicated Collections Fetch
 
 ## Status
 
-Not started
+In Progress
 
 ## Goals
 
-<!-- Describe the next feature here -->
+Fix three findings from the code-scanner review:
+
+1. **Header buttons have no accessible name on mobile** — in `src/components/dashboard/dashboard-header.tsx`, the "New Collection" and "New Item" labels are wrapped in `hidden sm:inline` spans, so below the `sm` breakpoint the buttons are icon-only with no accessible name. Add `aria-label="New Collection"` / `aria-label="New Item"` to the buttons.
+2. **Search input has no label** — the search `Input` in `dashboard-header.tsx` relies on its placeholder only. Add `aria-label="Search items"`.
+3. **Dashboard fetches collections twice** — on `/dashboard`, the sidebar (`getSidebarCollections()`) and Recent Collections (`getRecentCollections(6)`) each call `fetchCollectionCards` in `src/lib/db/collections.ts`, running two near-identical `collection.findMany` queries (with nested items → itemType). Fetch once and have `getRecentCollections` take its slice from the shared, `cache`-wrapped `getSidebarCollections()` result, since both order by `updatedAt desc`.
 
 ## Notes
+
+- Both queries order by `updatedAt desc`, so slicing the full list gives the same result as `take: limit`.
+- No visual changes: the labels only affect screen readers.
+- Out of scope: the SQL-aggregation rewrite of `fetchCollectionCards` and the composite indexes (separate findings).
+- Verify: `npm run build` passes; dashboard renders the same sidebar and Recent Collections as before.
 
 ## History
 

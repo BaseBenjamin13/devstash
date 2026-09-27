@@ -71,27 +71,26 @@ function toCollectionCard(collection: CollectionRow): CollectionCardData {
   };
 }
 
-async function fetchCollectionCards(limit?: number): Promise<CollectionCardData[]> {
-  const userId = await getCurrentUserId();
-  if (!userId) return [];
+// All of the user's collections, most recently updated first. Shared by the
+// sidebar and the dashboard's Recent Collections so a request queries once.
+export const getSidebarCollections = cache(
+  async (): Promise<CollectionCardData[]> => {
+    const userId = await getCurrentUserId();
+    if (!userId) return [];
 
-  const collections = await prisma.collection.findMany({
-    where: { userId },
-    orderBy: { updatedAt: "desc" },
-    ...(limit !== undefined ? { take: limit } : {}),
-    include: collectionCardInclude,
-  });
+    const collections = await prisma.collection.findMany({
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+      include: collectionCardInclude,
+    });
 
-  return collections.map(toCollectionCard);
-}
-
-export const getRecentCollections = cache(
-  (limit: number): Promise<CollectionCardData[]> => fetchCollectionCards(limit)
+    return collections.map(toCollectionCard);
+  }
 );
 
-// All of the user's collections, for the sidebar's favorites/recents lists.
-export const getSidebarCollections = cache(
-  (): Promise<CollectionCardData[]> => fetchCollectionCards()
+export const getRecentCollections = cache(
+  async (limit: number): Promise<CollectionCardData[]> =>
+    (await getSidebarCollections()).slice(0, limit)
 );
 
 export interface CollectionStats {

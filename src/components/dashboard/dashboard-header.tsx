@@ -26,13 +26,23 @@ export function DashboardHeader() {
       </div>
       <div className="relative max-w-md flex-1">
         <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input type="search" placeholder="Search items..." className="pl-8" />
+        <Input
+          type="search"
+          placeholder="Search items..."
+          aria-label="Search items"
+          className="pl-8"
+        />
       </div>
-      <Button variant="outline" size="sm" className="gap-1.5">
+      <Button
+        variant="outline"
+        size="sm"
+        aria-label="New Collection"
+        className="gap-1.5"
+      >
         <FolderPlus className="size-4" />
         <span className="hidden translate-y-px sm:inline">New Collection</span>
       </Button>
-      <Button size="sm" className="gap-1.5">
+      <Button size="sm" aria-label="New Item" className="gap-1.5">
         <Plus className="size-4" />
         <span className="hidden translate-y-px sm:inline">New Item</span>
       </Button>
