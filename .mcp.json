@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "neon": {
+      "type": "http",
+      "url": "https://mcp.neon.tech/mcp"
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ctx7sk-0daab431-06b4-45d8-bb23-fe3668b1a31b"
+      }
+    }
+  }
+}
